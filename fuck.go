@@ -30,16 +30,17 @@ func main() {
 		}
 	}()
 
+	buffer := bytes.NewBuffer(nil)
 	var fuck func()
 	fuck = func() {
 		calls = calls + 1
 		cmd := exec.Command("go", os.Args[1:]...)
 
-		buffer := bytes.NewBuffer(nil)
 		writer := io.MultiWriter(buffer, os.Stderr)
 		cmd.Stderr = writer
 		cmd.Stdout = os.Stdout
 		scanner := bufio.NewScanner(buffer)
+
 		err := cmd.Run()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -53,6 +54,7 @@ func main() {
 			file, lineN, err := parseFileLine(b)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
+				continue
 			}
 			if lineN < 1 {
 				continue

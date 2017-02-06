@@ -1,0 +1,19 @@
+language: go
+
+# use containers which run faster and have cache
+sudo: false
+
+go:
+  - tip
+  - 1.7.x
+
+go_import_path: github.com/adamryman/go-fuck-yourself
+
+script:
+  - go install -v github.com/adamryman/go-fuck-yourself/...
+  - cd _test
+  - go-fuck-yourself build main.go
+  - ./main
+
+notifications:
+  email: false

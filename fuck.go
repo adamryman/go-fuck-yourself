@@ -8,9 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/adamryman/kit/file/line"
 	// Dave Cheny
 	"github.com/pkg/errors"
 )
@@ -36,14 +36,12 @@ func main() {
 		calls = calls + 1
 		cmd := exec.Command("go", os.Args[1:]...)
 
-		writer := io.MultiWriter(buffer, os.Stderr)
-		cmd.Stderr = writer
+		cmd.Stderr = buffer
 		cmd.Stdout = os.Stdout
 		scanner := bufio.NewScanner(buffer)
 
 		err := cmd.Run()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
 			defer fuck()
 		}
 
@@ -59,11 +57,12 @@ func main() {
 			if lineN < 1 {
 				continue
 			}
-			err = lineDeleteWrapper(file, lineN-linesRemoved)
+			line, err := Delete(file, lineN-linesRemoved)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			} else {
 				linesRemoved = linesRemoved + 1
+				fmt.Fprintf(os.Stderr, "FUCK: `%s`\n", strings.TrimSpace(line))
 			}
 		}
 		buffer.Reset()
@@ -85,10 +84,44 @@ func parseFileLine(goOut []byte) (string, int, error) {
 	return file, lineN, nil
 }
 
-func lineDeleteWrapper(path string, lineN int) error {
-	err := line.Delete(path, lineN)
+// Delete removes one line from a file by path and returns the line removed
+func Delete(path string, line int) (string, error) {
+	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return "", errors.Wrap(err, "cannot open file to remove line")
 	}
-	return nil
+	scanner := bufio.NewScanner(f)
+	buffer := bytes.NewBuffer(nil)
+	for i := 1; i < line; i++ {
+		scanner.Scan()
+		_, err = buffer.Write(append(scanner.Bytes(), byte('\n')))
+		if err != nil {
+			return "", errors.Wrap(err, "cannot write to buffer")
+		}
+	}
+	// DO IT
+	scanner.Scan()
+	fuck := scanner.Text()
+	// SEE YA
+	for scanner.Scan() {
+		_, err = buffer.Write(append(scanner.Bytes(), byte('\n')))
+		if err != nil {
+			return "", errors.Wrap(err, "cannot write to buffer")
+		}
+	}
+	err = f.Close()
+	if err != nil {
+		return "", errors.Wrap(err, "cannot close old file")
+	}
+	// LETS DO IT
+	f, err = os.Create(path)
+	if err != nil {
+		return "", errors.Wrap(err, "cannot overwrite old file with new file")
+	}
+	_, err = io.Copy(f, buffer)
+	if err != nil {
+		return "", errors.Wrap(err, "cannot write to new file")
+	}
+
+	return fuck, nil
 }

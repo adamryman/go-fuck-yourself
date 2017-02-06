@@ -2,6 +2,11 @@
 
 ```
 go get github.com/adamryman/go-fuck-yourself
+
+// For a more `goofy` command, identical in all but name and print. To show your pg friends.
+go get github.com/adamryman/go-fuck-yourself/goofy
+
+// \ʕ◔ϖ◔ʔ/
 ```
 
 `go-fuck-yourself` is a `go` wrapper that will make your code build, forcefully.

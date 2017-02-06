@@ -17,6 +17,16 @@ import (
 
 const maxCalls = 100
 
+var pgMode bool
+
+func init() {
+	// pg test
+	if os.Args[0] == "goofy" {
+		pgMode = true
+	}
+
+}
+
 func main() {
 	var calls int
 	go func() {
@@ -62,7 +72,12 @@ func main() {
 				fmt.Fprintln(os.Stderr, err)
 			} else {
 				linesRemoved = linesRemoved + 1
-				fmt.Fprintf(os.Stderr, "FUCK: `%s`\n", strings.TrimSpace(line))
+				if pgMode {
+					fmt.Fprintf(os.Stderr, "Lets just not do this: `%s`\n", strings.TrimSpace(line))
+
+				} else {
+					fmt.Fprintf(os.Stderr, "FUCK: `%s`\n", strings.TrimSpace(line))
+				}
 			}
 		}
 		buffer.Reset()

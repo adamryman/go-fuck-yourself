@@ -1,4 +1,4 @@
-# go-fuck-yourself
+# go-fuck-yourself [![Build Status](https://travis-ci.org/adamryman/go-fuck-yourself.svg?branch=master)](https://travis-ci.org/adamryman/go-fuck-yourself)
 
 ```
 go get github.com/adamryman/go-fuck-youself
